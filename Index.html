@@ -5,154 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎮 משחק ALIAS PRO - מולטיפלייר</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
-        
         @keyframes pulse-fast {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
-        
-        @keyframes slideInLeft {
-            from {
-                opacity: 0;
-                transform: translateX(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-        
-        @keyframes slideInRight {
-            from {
-                opacity: 0;
-                transform: translateX(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-        
         @keyframes bounce-word {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.1); }
         }
-        
-        @keyframes glow {
-            0%, 100% { box-shadow: 0 0 5px rgba(0,0,0,0.1); }
-            50% { box-shadow: 0 0 20px rgba(0,0,0,0.3); }
-        }
-        
-        .animate-slide-in {
-            animation: slideIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        
-        .animate-fade-in {
-            animation: fadeIn 0.5s ease-out;
-        }
-        
-        .animate-pulse-fast {
-            animation: pulse-fast 1s infinite;
-        }
-        
-        .animate-slide-left {
-            animation: slideInLeft 0.6s ease-out;
-        }
-        
-        .animate-slide-right {
-            animation: slideInRight 0.6s ease-out;
-        }
-        
-        .animate-bounce-word {
-            animation: bounce-word 0.6s ease-in-out;
-        }
-        
-        .animate-glow {
-            animation: glow 2s ease-in-out infinite;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        html {
-            scroll-behavior: smooth;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        .card-shadow {
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-        }
-        
-        .button-pulse:hover {
-            animation: glow 1s ease-in-out;
-        }
-        
-        .gradient-text {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+        .animate-slide-in { animation: slideIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out; }
+        .animate-pulse-fast { animation: pulse-fast 1s infinite; }
+        .animate-bounce-word { animation: bounce-word 0.6s ease-in-out; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
     </style>
 </head>
 <body class="bg-gray-50">
     <div id="app"></div>
 
     <script>
-        // ===========================
-        // משחק ALIAS PRO - קוד מלא
-        // ===========================
-        
         const state = {
-            // מסך ניווט
             screen: 'home',
-            
-            // נתוני שחקן
             playerName: '',
             roomCode: '',
             gameRoomId: '',
             isHost: false,
-            
-            // נתוני משחק
             players: [],
             teams: { red: [], blue: [] },
             currentWord: '',
             currentTeam: 'red',
             score: { red: 0, blue: 0 },
-            roundsPlayed: { red: 0, blue: 0 },
             timeLeft: 60,
             gameActive: false,
             gamePaused: false,
             totalRounds: 0,
-            
-            // הגדרות משחק
             roundTime: 60,
-            difficulty: 'easy', // easy, medium, hard, mixed
-            
-            // מילים לפי רמה
+            difficulty: 'easy',
             wordLists: {
                 easy: [
                     'תפוח', 'מכונית', 'שמלה', 'ספר', 'מחשב', 'חתול', 'בית', 'עץ', 'ים', 'שמש',
@@ -170,24 +67,11 @@
                     'סימטריה', 'אסימטריה', 'קונגרואנציה', 'דיספרופורציה', 'הרמוניה', 'דיסוננס', 'קדנציה', 'רעולי', 'גרדוס', 'מודולציה'
                 ]
             },
-            
-            // מצב טיימר
             timerInterval: null,
             pollingInterval: null,
-            
-            // סטטיסטיקות
-            stats: {
-                correctGuesses: 0,
-                totalGuesses: 0,
-                bestPlayer: '',
-                bestTeam: ''
-            }
+            stats: { correctGuesses: 0, totalGuesses: 0 }
         };
 
-        // ===========================
-        // פונקציות עזר
-        // ===========================
-        
         function generateRoomCode() {
             return Math.random().toString(36).substring(2, 8).toUpperCase();
         }
@@ -240,7 +124,6 @@
 
         function startPolling() {
             if (state.pollingInterval) clearInterval(state.pollingInterval);
-            
             state.pollingInterval = setInterval(() => {
                 if (state.gameRoomId) {
                     const roomData = loadFromStorage(state.gameRoomId);
@@ -250,12 +133,10 @@
                         state.score = roomData.score || { red: 0, blue: 0 };
                         state.currentWord = roomData.currentWord || '';
                         state.currentTeam = roomData.currentTeam || 'red';
-                        
                         if (roomData.gameStarted && state.screen === 'waiting') {
                             state.screen = 'playing';
                             startRound();
                         }
-                        
                         render();
                     }
                 }
@@ -267,26 +148,20 @@
         }
 
         function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                alert('✅ קוד הועתק!');
-            });
+            navigator.clipboard.writeText(text);
+            alert('✅ קוד הועתק!');
         }
 
-        // ===========================
-        // פונקציות משחק ראשיות
-        // ===========================
-        
         async function createRoom() {
             if (!state.playerName.trim()) {
                 alert('בחר שם!');
                 return;
             }
-            
             const code = generateRoomCode();
             const roomData = {
                 code,
                 host: state.playerName,
-                players: [{ name: state.playerName, joined: true, avatar: '👤' }],
+                players: [{ name: state.playerName, joined: true }],
                 gameStarted: false,
                 teams: { red: [], blue: [] },
                 score: { red: 0, blue: 0 },
@@ -299,19 +174,14 @@
                 totalRounds: 0,
                 stats: state.stats
             };
-            
-            try {
-                state.gameRoomId = code;
-                state.roomCode = code;
-                state.isHost = true;
-                state.players = roomData.players;
-                state.screen = 'waiting';
-                localStorage.setItem(`room_${code}`, JSON.stringify(roomData));
-                startPolling();
-                render();
-            } catch (error) {
-                alert('שגיאה ביצירת חדר: ' + error.message);
-            }
+            state.gameRoomId = code;
+            state.roomCode = code;
+            state.isHost = true;
+            state.players = roomData.players;
+            state.screen = 'waiting';
+            localStorage.setItem(`room_${code}`, JSON.stringify(roomData));
+            startPolling();
+            render();
         }
 
         async function joinRoom() {
@@ -319,36 +189,26 @@
                 alert('מלא שם וקוד!');
                 return;
             }
-            
-            try {
-                const code = state.roomCode.toUpperCase();
-                const data = localStorage.getItem(`room_${code}`);
-                
-                if (!data) {
-                    alert('קוד לא קיים!');
-                    return;
-                }
-                
-                const roomData = JSON.parse(data);
-                
-                if (!roomData.players.some(p => p.name === state.playerName)) {
-                    roomData.players.push({ name: state.playerName, joined: true, avatar: '👤' });
-                }
-                
-                localStorage.setItem(`room_${code}`, JSON.stringify(roomData));
-                
-                state.gameRoomId = code;
-                state.roomCode = code;
-                state.isHost = false;
-                state.players = roomData.players;
-                state.difficulty = roomData.difficulty || 'easy';
-                state.roundTime = roomData.roundTime || 60;
-                state.screen = 'waiting';
-                startPolling();
-                render();
-            } catch (error) {
-                alert('שגיאה בהצטרפות: ' + error.message);
+            const code = state.roomCode.toUpperCase();
+            const data = localStorage.getItem(`room_${code}`);
+            if (!data) {
+                alert('קוד לא קיים!');
+                return;
             }
+            const roomData = JSON.parse(data);
+            if (!roomData.players.some(p => p.name === state.playerName)) {
+                roomData.players.push({ name: state.playerName, joined: true });
+            }
+            localStorage.setItem(`room_${code}`, JSON.stringify(roomData));
+            state.gameRoomId = code;
+            state.roomCode = code;
+            state.isHost = false;
+            state.players = roomData.players;
+            state.difficulty = roomData.difficulty || 'easy';
+            state.roundTime = roomData.roundTime || 60;
+            state.screen = 'waiting';
+            startPolling();
+            render();
         }
 
         async function startGame() {
@@ -356,78 +216,57 @@
                 alert('צריך לפחות 2 שחקנים!');
                 return;
             }
-            
             const shuffled = [...state.players].sort(() => Math.random() - 0.5);
             const mid = Math.ceil(shuffled.length / 2);
-            const red = shuffled.slice(0, mid);
-            const blue = shuffled.slice(mid);
-            
             const newTeams = {
-                red: red.map(p => p.name),
-                blue: blue.map(p => p.name)
+                red: shuffled.slice(0, mid).map(p => p.name),
+                blue: shuffled.slice(mid).map(p => p.name)
             };
-            
-            try {
-                const roomData = JSON.parse(localStorage.getItem(`room_${state.gameRoomId}`));
-                roomData.gameStarted = true;
-                roomData.teams = newTeams;
-                roomData.score = { red: 0, blue: 0 };
-                roomData.currentWord = getRandomWord();
-                roomData.currentTeam = 'red';
-                roomData.gameActive = false;
-                roomData.totalRounds = 0;
-                
-                localStorage.setItem(`room_${state.gameRoomId}`, JSON.stringify(roomData));
-                
-                state.teams = newTeams;
-                state.score = { red: 0, blue: 0 };
-                state.currentWord = roomData.currentWord;
-                state.screen = 'playing';
-                state.totalRounds = 0;
-                saveToStorage();
-                render();
-            } catch (error) {
-                alert('שגיאה בהתחלת משחק: ' + error.message);
-            }
+            const roomData = JSON.parse(localStorage.getItem(`room_${state.gameRoomId}`));
+            roomData.gameStarted = true;
+            roomData.teams = newTeams;
+            roomData.score = { red: 0, blue: 0 };
+            roomData.currentWord = getRandomWord();
+            roomData.currentTeam = 'red';
+            roomData.gameActive = false;
+            roomData.totalRounds = 0;
+            localStorage.setItem(`room_${state.gameRoomId}`, JSON.stringify(roomData));
+            state.teams = newTeams;
+            state.score = { red: 0, blue: 0 };
+            state.currentWord = roomData.currentWord;
+            state.screen = 'playing';
+            state.totalRounds = 0;
+            saveToStorage();
+            render();
         }
 
         function startTimer() {
             if (state.timerInterval) clearInterval(state.timerInterval);
-            
             state.timerInterval = setInterval(() => {
                 if (!state.gamePaused) {
                     state.timeLeft--;
                     saveToStorage();
-                    
                     if (state.timeLeft <= 0) {
                         clearInterval(state.timerInterval);
                         handleEndRound();
                     }
                 }
-                
                 render();
             }, 1000);
         }
 
         async function handleEndRound() {
             state.gameActive = false;
-            state.roundsPlayed[state.currentTeam]++;
             const nextTeam = state.currentTeam === 'red' ? 'blue' : 'red';
             state.currentTeam = nextTeam;
             state.timeLeft = state.roundTime;
             state.totalRounds++;
-            
-            try {
-                const roomData = JSON.parse(localStorage.getItem(`state.gameRoomId`));
-                roomData.gameActive = false;
-                roomData.currentTeam = nextTeam;
-                roomData.timeLeft = state.roundTime;
-                roomData.totalRounds = state.totalRounds;
-                localStorage.setItem(`room_${state.gameRoomId}`, JSON.stringify(roomData));
-            } catch (error) {
-                console.error('שגיאה בסיום סיבוב:', error);
-            }
-            
+            const roomData = JSON.parse(localStorage.getItem(`room_${state.gameRoomId}`));
+            roomData.gameActive = false;
+            roomData.currentTeam = nextTeam;
+            roomData.timeLeft = state.roundTime;
+            roomData.totalRounds = state.totalRounds;
+            localStorage.setItem(`room_${state.gameRoomId}`, JSON.stringify(roomData));
             render();
         }
 
@@ -441,8 +280,7 @@
 
         async function skipWord() {
             state.stats.totalGuesses++;
-            const newWord = getRandomWord();
-            state.currentWord = newWord;
+            state.currentWord = getRandomWord();
             saveToStorage();
             render();
         }
@@ -452,17 +290,11 @@
             state.timeLeft = state.roundTime;
             state.gameActive = true;
             state.gamePaused = false;
-            
-            try {
-                const roomData = JSON.parse(localStorage.getItem(`room_${state.gameRoomId}`));
-                roomData.gameActive = true;
-                roomData.currentWord = state.currentWord;
-                roomData.timeLeft = state.roundTime;
-                localStorage.setItem(`room_${state.gameRoomId}`, JSON.stringify(roomData));
-            } catch (error) {
-                console.error('שגיאה בהתחלת סיבוב:', error);
-            }
-            
+            const roomData = JSON.parse(localStorage.getItem(`room_${state.gameRoomId}`));
+            roomData.gameActive = true;
+            roomData.currentWord = state.currentWord;
+            roomData.timeLeft = state.roundTime;
+            localStorage.setItem(`room_${state.gameRoomId}`, JSON.stringify(roomData));
             startTimer();
             render();
         }
@@ -493,419 +325,161 @@
             state.gameActive = false;
             state.currentTeam = 'red';
             state.timeLeft = 60;
-            state.stats = { correctGuesses: 0, totalGuesses: 0, bestPlayer: '', bestTeam: '' };
+            state.stats = { correctGuesses: 0, totalGuesses: 0 };
             render();
         }
 
-        // ===========================
-        // פונקציות render
-        // ===========================
-        
         function render() {
             const app = document.getElementById('app');
-            
             switch (state.screen) {
-                case 'home':
-                    app.innerHTML = renderHome();
-                    break;
-                case 'create':
-                    app.innerHTML = renderCreate();
-                    break;
-                case 'join':
-                    app.innerHTML = renderJoin();
-                    break;
-                case 'waiting':
-                    app.innerHTML = renderWaiting();
-                    break;
-                case 'settings':
-                    app.innerHTML = renderSettings();
-                    break;
-                case 'playing':
-                    app.innerHTML = renderPlaying();
-                    break;
-                case 'results':
-                    app.innerHTML = renderResults();
-                    break;
-                default:
-                    app.innerHTML = renderHome();
+                case 'home': app.innerHTML = renderHome(); break;
+                case 'create': app.innerHTML = renderCreate(); break;
+                case 'join': app.innerHTML = renderJoin(); break;
+                case 'waiting': app.innerHTML = renderWaiting(); break;
+                case 'playing': app.innerHTML = renderPlaying(); break;
+                case 'results': app.innerHTML = renderResults(); break;
+                default: app.innerHTML = renderHome();
             }
         }
 
         function renderHome() {
-            return `
-                <div class="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-red-500 flex items-center justify-center p-4 relative overflow-hidden">
-                    <!-- Background Animation -->
-                    <div class="absolute inset-0 opacity-10">
-                        <div class="absolute w-40 h-40 bg-white rounded-full mix-blend-screen filter blur-xl animate-pulse" style="top: 10%; right: 10%;"></div>
-                        <div class="absolute w-40 h-40 bg-white rounded-full mix-blend-screen filter blur-xl animate-pulse" style="bottom: 10%; left: 10%;"></div>
+            return `<div class="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-red-500 flex items-center justify-center p-4">
+                <div class="relative z-10 max-w-2xl w-full">
+                    <div class="text-center mb-12 animate-slide-in">
+                        <h1 class="text-7xl font-black mb-4 text-white">🎮</h1>
+                        <h1 class="text-6xl font-black text-white mb-2">ALIAS PRO</h1>
+                        <p class="text-2xl text-white opacity-90">משחק מילים מוכתם</p>
                     </div>
-                    
-                    <div class="relative z-10 max-w-2xl w-full">
-                        <div class="text-center mb-12 animate-slide-in">
-                            <h1 class="text-7xl font-black mb-4 text-white drop-shadow-lg">🎮</h1>
-                            <h1 class="text-6xl font-black text-white mb-2 drop-shadow-lg">ALIAS PRO</h1>
-                            <p class="text-2xl text-white opacity-90">משחק מילים מוכתם</p>
+                    <div class="bg-white rounded-3xl shadow-2xl p-10 max-w-md mx-auto w-full">
+                        <div class="mb-6">
+                            <label class="block text-gray-800 font-bold text-lg mb-3">בחר שם:</label>
+                            <input type="text" placeholder="שם השחקן" value="${state.playerName}" onchange="state.playerName = this.value; render()" maxlength="20" class="w-full px-5 py-4 border-3 border-purple-300 rounded-2xl focus:outline-none focus:border-purple-600 text-right text-lg"/>
                         </div>
-                        
-                        <div class="bg-white rounded-3xl shadow-2xl p-10 max-w-md mx-auto w-full transform hover:scale-105 transition-transform duration-300 animate-slide-in">
-                            <div class="mb-6">
-                                <label class="block text-gray-800 font-bold text-lg mb-3">בחר שם:</label>
-                                <input
-                                    type="text"
-                                    placeholder="שם השחקן"
-                                    value="${state.playerName}"
-                                    onchange="state.playerName = this.value; render()"
-                                    maxlength="20"
-                                    class="w-full px-5 py-4 border-3 border-purple-300 rounded-2xl focus:outline-none focus:border-purple-600 text-right text-lg font-semibold transition-all duration-300"
-                                />
-                            </div>
-                            
-                            <button
-                                onclick="state.screen = 'create'; render()"
-                                class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-4 rounded-2xl mb-4 transform hover:scale-105 transition-all duration-300 shadow-lg text-lg flex items-center justify-center gap-2"
-                            >
-                                📝 יצור חדר חדש
-                            </button>
-                            
-                            <button
-                                onclick="state.screen = 'join'; render()"
-                                class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold py-4 rounded-2xl transform hover:scale-105 transition-all duration-300 shadow-lg text-lg flex items-center justify-center gap-2"
-                            >
-                                🚪 הצטרף לחדר קיים
-                            </button>
-                        </div>
-                        
-                        <!-- עמוד מידע -->
-                        <div class="mt-8 bg-white bg-opacity-20 backdrop-blur-lg rounded-2xl p-6 text-white text-center animate-fade-in">
-                            <p class="text-sm opacity-90">משחק זה משתמש ב-LocalStorage בלבד • ללא צורך בשרת • עובד על כל מכשיר</p>
-                        </div>
+                        <button onclick="state.screen = 'create'; render()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-4 rounded-2xl mb-4 shadow-lg text-lg">📝 יצור חדר חדש</button>
+                        <button onclick="state.screen = 'join'; render()" class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold py-4 rounded-2xl shadow-lg text-lg">🚪 הצטרף לחדר קיים</button>
                     </div>
                 </div>
-            `;
+            </div>`;
         }
 
         function renderCreate() {
-            return `
-                <div class="min-h-screen bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center p-4">
-                    <div class="bg-white rounded-3xl shadow-2xl p-10 max-w-md w-full animate-slide-in">
-                        <button
-                            onclick="state.screen = 'home'; render()"
-                            class="mb-6 text-gray-500 hover:text-gray-700 text-2xl transition-colors"
-                        >
-                            ← חזור
-                        </button>
-                        
-                        <h2 class="text-4xl font-bold mb-8 text-center text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">יצירת חדר</h2>
-                        
-                        <p class="text-center text-gray-700 mb-8 text-lg">
-                            👋 שלום <span class="font-bold text-purple-600">${state.playerName}</span>!
-                        </p>
-                        
-                        <!-- בחירת רמת קושי -->
-                        <div class="mb-6">
-                            <label class="block text-gray-800 font-bold mb-3">רמת קושי:</label>
-                            <div class="grid grid-cols-3 gap-2">
-                                <button
-                                    onclick="state.difficulty = 'easy'; render()"
-                                    class="px-3 py-2 rounded-lg font-semibold transition-all ${state.difficulty === 'easy' ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}"
-                                >
-                                    קל 😊
-                                </button>
-                                <button
-                                    onclick="state.difficulty = 'medium'; render()"
-                                    class="px-3 py-2 rounded-lg font-semibold transition-all ${state.difficulty === 'medium' ? 'bg-yellow-500 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}"
-                                >
-                                    בינוני 😐
-                                </button>
-                                <button
-                                    onclick="state.difficulty = 'hard'; render()"
-                                    class="px-3 py-2 rounded-lg font-semibold transition-all ${state.difficulty === 'hard' ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}"
-                                >
-                                    קשה 🤯
-                                </button>
-                            </div>
+            return `<div class="min-h-screen bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center p-4">
+                <div class="bg-white rounded-3xl shadow-2xl p-10 max-w-md w-full">
+                    <button onclick="state.screen = 'home'; render()" class="mb-6 text-gray-500 text-2xl">← חזור</button>
+                    <h2 class="text-4xl font-bold mb-8 text-center text-purple-600">יצירת חדר</h2>
+                    <p class="text-center text-gray-700 mb-8 text-lg">👋 שלום <span class="font-bold text-purple-600">${state.playerName}</span>!</p>
+                    <div class="mb-6">
+                        <label class="block text-gray-800 font-bold mb-3">רמת קושי:</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="state.difficulty = 'easy'; render()" class="px-3 py-2 rounded-lg font-semibold ${state.difficulty === 'easy' ? 'bg-green-500 text-white' : 'bg-gray-200'}">קל 😊</button>
+                            <button onclick="state.difficulty = 'medium'; render()" class="px-3 py-2 rounded-lg font-semibold ${state.difficulty === 'medium' ? 'bg-yellow-500 text-white' : 'bg-gray-200'}">בינוני 😐</button>
+                            <button onclick="state.difficulty = 'hard'; render()" class="px-3 py-2 rounded-lg font-semibold ${state.difficulty === 'hard' ? 'bg-red-500 text-white' : 'bg-gray-200'}">קשה 🤯</button>
                         </div>
-                        
-                        <!-- בחירת זמן -->
-                        <div class="mb-8">
-                            <label class="block text-gray-800 font-bold mb-3">זמן לסיבוב: ${state.roundTime}s</label>
-                            <input
-                                type="range"
-                                min="30"
-                                max="120"
-                                value="${state.roundTime}"
-                                onchange="state.roundTime = parseInt(this.value); render()"
-                                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                            />
-                        </div>
-                        
-                        <button
-                            onclick="createRoom()"
-                            class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-4 rounded-2xl transform hover:scale-105 transition-all shadow-lg text-xl"
-                        >
-                            ✨ יצור חדר
-                        </button>
                     </div>
+                    <div class="mb-8">
+                        <label class="block text-gray-800 font-bold mb-3">זמן: ${state.roundTime}s</label>
+                        <input type="range" min="30" max="120" value="${state.roundTime}" onchange="state.roundTime = parseInt(this.value); render()" class="w-full h-2 bg-gray-200 rounded-lg"/>
+                    </div>
+                    <button onclick="createRoom()" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-4 rounded-2xl shadow-lg text-xl">✨ יצור חדר</button>
                 </div>
-            `;
+            </div>`;
         }
 
         function renderJoin() {
-            return `
-                <div class="min-h-screen bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center p-4">
-                    <div class="bg-white rounded-3xl shadow-2xl p-10 max-w-md w-full animate-slide-in">
-                        <button
-                            onclick="state.screen = 'home'; render()"
-                            class="mb-6 text-gray-500 hover:text-gray-700 text-2xl transition-colors"
-                        >
-                            ← חזור
-                        </button>
-                        
-                        <h2 class="text-4xl font-bold mb-8 text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-600">הצטרף לחדר</h2>
-                        
-                        <p class="text-center text-gray-700 mb-8 text-lg">
-                            👋 שלום <span class="font-bold text-blue-600">${state.playerName}</span>!
-                        </p>
-                        
-                        <label class="block text-gray-700 font-bold mb-3 text-lg">קוד החדר:</label>
-                        <input
-                            type="text"
-                            placeholder="ABC123"
-                            value="${state.roomCode}"
-                            onchange="state.roomCode = this.value.toUpperCase(); render()"
-                            oninput="state.roomCode = this.value.toUpperCase(); render()"
-                            class="w-full px-4 py-4 border-3 border-blue-300 rounded-2xl mb-4 focus:outline-none focus:border-blue-600 text-center text-3xl font-black tracking-widest transition-all"
-                            maxlength="6"
-                        />
-                        
-                        <button
-                            onclick="joinRoom()"
-                            class="w-full bg-gradient-to-r from-blue-500 to-cyan-600 text-white font-bold py-4 rounded-2xl transform hover:scale-105 transition-all shadow-lg text-lg"
-                        >
-                            ✅ הצטרף
-                        </button>
-                    </div>
+            return `<div class="min-h-screen bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center p-4">
+                <div class="bg-white rounded-3xl shadow-2xl p-10 max-w-md w-full">
+                    <button onclick="state.screen = 'home'; render()" class="mb-6 text-gray-500 text-2xl">← חזור</button>
+                    <h2 class="text-4xl font-bold mb-8 text-center text-blue-600">הצטרף לחדר</h2>
+                    <p class="text-center text-gray-700 mb-8 text-lg">👋 שלום <span class="font-bold text-blue-600">${state.playerName}</span>!</p>
+                    <label class="block text-gray-700 font-bold mb-3 text-lg">קוד החדר:</label>
+                    <input type="text" placeholder="ABC123" value="${state.roomCode}" onchange="state.roomCode = this.value.toUpperCase(); render()" oninput="state.roomCode = this.value.toUpperCase(); render()" class="w-full px-4 py-4 border-3 border-blue-300 rounded-2xl mb-4 text-center text-3xl font-black" maxlength="6"/>
+                    <button onclick="joinRoom()" class="w-full bg-gradient-to-r from-blue-500 to-cyan-600 text-white font-bold py-4 rounded-2xl shadow-lg text-lg">✅ הצטרף</button>
                 </div>
-            `;
+            </div>`;
         }
 
         function renderWaiting() {
-            const shareText = `היי! הצטרף למשחק ALIAS שלי! קוד: ${state.roomCode}`;
-            
-            return `
-                <div class="min-h-screen bg-gradient-to-br from-indigo-600 to-purple-500 p-4 pb-20">
-                    <div class="max-w-2xl mx-auto">
-                        <!-- כותרת -->
-                        <div class="bg-white rounded-3xl shadow-2xl p-8 mb-6 text-center animate-slide-in">
-                            <h2 class="text-5xl font-black text-purple-600 mb-4">📋 חדר משחק</h2>
-                            <div class="bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl p-6 mb-4">
-                                <p class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 tracking-widest mb-4">
-                                    ${state.roomCode}
-                                </p>
-                                <button
-                                    onclick="copyToClipboard('${state.roomCode}')"
-                                    class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-xl transition-all text-sm"
-                                >
-                                    📋 העתק קוד
-                                </button>
-                            </div>
-                            <p class="text-gray-600 text-lg">שתף קוד זה עם חברים</p>
+            return `<div class="min-h-screen bg-gradient-to-br from-indigo-600 to-purple-500 p-4 pb-20">
+                <div class="max-w-2xl mx-auto">
+                    <div class="bg-white rounded-3xl shadow-2xl p-8 mb-6 text-center">
+                        <h2 class="text-5xl font-black text-purple-600 mb-4">📋 חדר משחק</h2>
+                        <div class="bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl p-6 mb-4">
+                            <p class="text-6xl font-black text-purple-600 tracking-widest mb-4">${state.roomCode}</p>
+                            <button onclick="copyToClipboard('${state.roomCode}')" class="bg-purple-600 text-white font-bold py-2 px-6 rounded-xl text-sm">📋 העתק קוד</button>
                         </div>
-
-                        <!-- שחקנים -->
-                        <div class="bg-white rounded-3xl shadow-2xl p-8 mb-6 animate-fade-in">
-                            <h3 class="text-2xl font-bold text-center mb-6 text-gray-800">
-                                👥 שחקנים (${state.players.length}/8)
-                            </h3>
-                            <div class="grid grid-cols-2 gap-4 mb-6">
-                                ${state.players.map((player, i) => `
-                                    <div class="bg-gradient-to-br from-purple-100 to-pink-100 p-5 rounded-2xl text-center font-bold text-lg transform hover:scale-105 transition-all animate-slide-in" style="animation-delay: ${i * 0.1}s">
-                                        👤 ${player.name}
-                                    </div>
-                                `).join('')}
-                                ${state.players.length < 2 ? `
-                                    <div class="bg-gray-100 p-5 rounded-2xl text-center text-gray-400 font-bold">
-                                        ⏳ בחכייה...
-                                    </div>
-                                ` : ''}
-                            </div>
-                            
-                            ${state.players.length < 2 ? `
-                                <p class="text-center text-red-600 font-bold text-lg">
-                                    ⏳ צריך לפחות 2 שחקנים (${2 - state.players.length} חסרים)
-                                </p>
-                            ` : ''}
-                        </div>
-
-                        <!-- הגדרות משחק -->
-                        ${state.isHost ? `
-                            <div class="bg-white rounded-3xl shadow-2xl p-8 mb-6">
-                                <h3 class="text-lg font-bold mb-4 text-gray-800">⚙️ הגדרות:</h3>
-                                <p class="text-gray-700 mb-2"><strong>רמה:</strong> ${state.difficulty === 'easy' ? 'קל' : state.difficulty === 'medium' ? 'בינוני' : 'קשה'}</p>
-                                <p class="text-gray-700"><strong>זמן:</strong> ${state.roundTime} שניות</p>
-                            </div>
-                        ` : ''}
-
-                        <!-- כפתור התחלה -->
-                        ${state.isHost && state.players.length >= 2 ? `
-                            <button
-                                onclick="startGame()"
-                                class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-5 rounded-2xl transform hover:scale-105 transition-all shadow-xl text-2xl animate-slide-in"
-                            >
-                                🎮 התחל משחק!
-                            </button>
-                        ` : `
-                            <div class="text-center">
-                                <p class="text-white text-lg font-bold">⏳ ${state.isHost ? 'בחכייה לשחקנים נוספים...' : 'בחכייה שה-Host יתחיל המשחק...'}</p>
-                            </div>
-                        `}
+                        <p class="text-gray-600 text-lg">שתף קוד זה עם חברים</p>
                     </div>
+                    <div class="bg-white rounded-3xl shadow-2xl p-8 mb-6">
+                        <h3 class="text-2xl font-bold text-center mb-6 text-gray-800">👥 שחקנים (${state.players.length}/8)</h3>
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            ${state.players.map((p, i) => `<div class="bg-purple-100 p-5 rounded-2xl text-center font-bold">👤 ${p.name}</div>`).join('')}
+                        </div>
+                        ${state.players.length < 2 ? `<p class="text-center text-red-600 font-bold text-lg">⏳ צריך לפחות 2 שחקנים (${2 - state.players.length} חסרים)</p>` : ''}
+                    </div>
+                    ${state.isHost && state.players.length >= 2 ? `<button onclick="startGame()" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-5 rounded-2xl shadow-xl text-2xl">🎮 התחל משחק!</button>` : `<div class="text-center"><p class="text-white text-lg font-bold">⏳ ${state.isHost ? 'בחכייה לשחקנים' : 'בחכייה שה-Host יתחיל'}</p></div>`}
                 </div>
-            `;
+            </div>`;
         }
 
         function renderPlaying() {
-            const bgGradient = state.currentTeam === 'red'
-                ? 'bg-gradient-to-br from-red-600 via-pink-500 to-red-500'
-                : 'bg-gradient-to-br from-blue-600 via-cyan-500 to-blue-500';
-            
-            const timeWarning = state.timeLeft <= 10 ? 'animate-pulse-fast' : '';
-
-            return `
-                <div class="min-h-screen transition-all duration-500 ${bgGradient} p-4 pb-20">
-                    <div class="max-w-4xl mx-auto">
-                        <!-- סטטיסטיקות -->
-                        <div class="grid grid-cols-3 gap-3 mb-6 animate-slide-in">
-                            <div class="${state.currentTeam === 'red' ? 'bg-red-500 ring-4 ring-red-300 scale-110' : 'bg-red-400 opacity-70'} rounded-3xl shadow-lg p-6 text-center transform transition-all duration-300">
-                                <p class="text-white text-xl font-bold">🔴 אדום</p>
-                                <p class="text-white text-5xl font-black">${state.score.red}</p>
-                            </div>
-
-                            <div class="bg-white rounded-3xl shadow-lg p-6 text-center transform hover:scale-105 transition-all">
-                                <p class="text-gray-800 font-bold mb-2 text-sm">⏱ זמן</p>
-                                <p class="text-6xl font-black ${timeWarning} text-gray-800">
-                                    ${state.timeLeft}
-                                </p>
-                            </div>
-
-                            <div class="${state.currentTeam === 'blue' ? 'bg-blue-500 ring-4 ring-blue-300 scale-110' : 'bg-blue-400 opacity-70'} rounded-3xl shadow-lg p-6 text-center transform transition-all duration-300">
-                                <p class="text-white text-xl font-bold">🔵 כחול</p>
-                                <p class="text-white text-5xl font-black">${state.score.blue}</p>
-                            </div>
+            const bgGradient = state.currentTeam === 'red' ? 'bg-gradient-to-br from-red-600 via-pink-500 to-red-500' : 'bg-gradient-to-br from-blue-600 via-cyan-500 to-blue-500';
+            return `<div class="min-h-screen transition-all ${bgGradient} p-4 pb-20">
+                <div class="max-w-4xl mx-auto">
+                    <div class="grid grid-cols-3 gap-3 mb-6">
+                        <div class="${state.currentTeam === 'red' ? 'bg-red-500 ring-4 ring-red-300 scale-110' : 'bg-red-400 opacity-70'} rounded-3xl shadow-lg p-6 text-center">
+                            <p class="text-white text-xl font-bold">🔴</p>
+                            <p class="text-white text-5xl font-black">${state.score.red}</p>
                         </div>
-
-                        <!-- המילה -->
-                        <div class="bg-white rounded-3xl shadow-2xl p-10 mb-6 text-center">
-                            <p class="text-gray-600 text-lg mb-4 font-bold">המילה להתאר:</p>
-                            <p class="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 mb-8 animate-bounce-word">
-                                ${state.currentWord || '?'}
-                            </p>
-                            
-                            ${!state.gameActive ? `
-                                <button
-                                    onclick="startRound()"
-                                    class="bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-4 px-10 rounded-2xl text-2xl transform hover:scale-110 transition-all shadow-lg"
-                                >
-                                    🚀 התחל סיבוב
-                                </button>
-                            ` : `
-                                <div class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-pink-600 animate-pulse-fast">
-                                    🎯 קבוצה ${state.currentTeam === 'red' ? 'אדומה' : 'כחולה'} - תאר!
-                                </div>
-                            `}
+                        <div class="bg-white rounded-3xl shadow-lg p-6 text-center">
+                            <p class="text-gray-800 font-bold mb-2">⏱</p>
+                            <p class="text-6xl font-black ${state.timeLeft <= 10 ? 'animate-pulse-fast' : ''} text-gray-800">${state.timeLeft}</p>
                         </div>
-
-                        <!-- כפתורים -->
-                        ${state.gameActive ? `
-                            <div class="grid grid-cols-2 gap-4 mb-6">
-                                <button
-                                    onclick="guessCorrect()"
-                                    class="bg-gradient-to-br from-green-500 to-emerald-600 text-white font-bold py-6 rounded-2xl transform hover:scale-110 transition-all shadow-xl text-2xl"
-                                >
-                                    ✅ נכון!
-                                </button>
-                                <button
-                                    onclick="skipWord()"
-                                    class="bg-gradient-to-br from-orange-500 to-yellow-600 text-white font-bold py-6 rounded-2xl transform hover:scale-110 transition-all shadow-xl text-2xl"
-                                >
-                                    ⏭ דלג
-                                </button>
-                            </div>
-                            
-                            <button
-                                onclick="togglePause()"
-                                class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 rounded-2xl mb-4 transition-all text-lg"
-                            >
-                                ${state.gamePaused ? '▶️ המשך' : '⏸ השהה'}
-                            </button>
-                        ` : ''}
-
-                        <!-- סיום משחק -->
-                        <button
-                            onclick="endGame()"
-                            class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-2xl transform hover:scale-105 transition-all shadow-lg text-lg"
-                        >
-                            🛑 סיים משחק
-                        </button>
+                        <div class="${state.currentTeam === 'blue' ? 'bg-blue-500 ring-4 ring-blue-300 scale-110' : 'bg-blue-400 opacity-70'} rounded-3xl shadow-lg p-6 text-center">
+                            <p class="text-white text-xl font-bold">🔵</p>
+                            <p class="text-white text-5xl font-black">${state.score.blue}</p>
+                        </div>
                     </div>
+                    <div class="bg-white rounded-3xl shadow-2xl p-10 mb-6 text-center">
+                        <p class="text-gray-600 text-lg mb-4 font-bold">המילה להתאר:</p>
+                        <p class="text-8xl font-black text-purple-600 mb-8 animate-bounce-word">${state.currentWord || '?'}</p>
+                        ${!state.gameActive ? `<button onclick="startRound()" class="bg-green-500 text-white font-bold py-4 px-10 rounded-2xl text-2xl shadow-lg">🚀 התחל סיבוק</button>` : `<div class="text-3xl font-black text-pink-600 animate-pulse-fast">🎯 תאר!</div>`}
+                    </div>
+                    ${state.gameActive ? `
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <button onclick="guessCorrect()" class="bg-green-500 text-white font-bold py-6 rounded-2xl text-2xl shadow-xl">✅ נכון!</button>
+                            <button onclick="skipWord()" class="bg-yellow-600 text-white font-bold py-6 rounded-2xl text-2xl shadow-xl">⏭ דלג</button>
+                        </div>
+                        <button onclick="togglePause()" class="w-full bg-yellow-500 text-white font-bold py-3 rounded-2xl mb-4 text-lg">${state.gamePaused ? '▶️ המשך' : '⏸ השהה'}</button>
+                    ` : ''}
+                    <button onclick="endGame()" class="w-full bg-red-600 text-white font-bold py-3 rounded-2xl shadow-lg text-lg">🛑 סיים משחק</button>
                 </div>
-            `;
+            </div>`;
         }
 
         function renderResults() {
-            const winner = state.score.red > state.score.blue ? 'אדומה' : 
-                          state.score.blue > state.score.red ? 'כחולה' : 'תיקו';
-            const winnerEmoji = winner === 'אדומה' ? '🔴' : winner === 'כחולה' ? '🔵' : '⚖️';
-            const winnerBg = winner === 'אדומה' ? 'from-red-600 to-pink-500' : 
-                            winner === 'כחולה' ? 'from-blue-600 to-cyan-500' : 'from-gray-600 to-gray-500';
-
-            return `
-                <div class="min-h-screen bg-gradient-to-br ${winnerBg} flex items-center justify-center p-4">
-                    <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full text-center animate-slide-in">
-                        <h2 class="text-7xl font-black mb-6 animate-bounce">🏆</h2>
-                        <h2 class="text-4xl font-bold mb-4 text-gray-800">
-                            קבוצה <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">${winner}</span>
-                        </h2>
-                        <p class="text-5xl font-black mb-8 text-gray-700">ניצחה!</p>
-                        
-                        <!-- ניקוד -->
-                        <div class="grid grid-cols-2 gap-4 mb-8">
-                            <div class="bg-red-100 rounded-2xl p-6 transform hover:scale-110 transition-all">
-                                <p class="text-red-600 font-bold text-lg mb-2">🔴 אדומה</p>
-                                <p class="text-5xl font-black text-red-600">${state.score.red}</p>
-                            </div>
-                            <div class="bg-blue-100 rounded-2xl p-6 transform hover:scale-110 transition-all">
-                                <p class="text-blue-600 font-bold text-lg mb-2">🔵 כחולה</p>
-                                <p class="text-5xl font-black text-blue-600">${state.score.blue}</p>
-                            </div>
+            const winner = state.score.red > state.score.blue ? 'אדומה' : state.score.blue > state.score.red ? 'כחולה' : 'תיקו';
+            const winnerBg = winner === 'אדומה' ? 'from-red-600 to-pink-500' : winner === 'כחולה' ? 'from-blue-600 to-cyan-500' : 'from-gray-600 to-gray-500';
+            return `<div class="min-h-screen bg-gradient-to-br ${winnerBg} flex items-center justify-center p-4">
+                <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full text-center">
+                    <h2 class="text-7xl font-black mb-6">🏆</h2>
+                    <h2 class="text-4xl font-bold mb-4 text-gray-800">קבוצה <span class="text-purple-600">${winner}</span></h2>
+                    <p class="text-5xl font-black mb-8 text-gray-700">ניצחה!</p>
+                    <div class="grid grid-cols-2 gap-4 mb-8">
+                        <div class="bg-red-100 rounded-2xl p-6">
+                            <p class="text-red-600 font-bold text-lg mb-2">🔴</p>
+                            <p class="text-5xl font-black text-red-600">${state.score.red}</p>
                         </div>
-                        
-                        <!-- סטטיסטיקות -->
-                        <div class="bg-gray-100 rounded-2xl p-4 mb-8 text-left">
-                            <p class="text-gray-700 font-semibold">📊 סטטיסטיקות:</p>
-                            <p class="text-gray-600 text-sm mt-2">סה"כ סיבובים: <strong>${state.totalRounds}</strong></p>
-                            <p class="text-gray-600 text-sm">נחשים נכונים: <strong>${state.stats.correctGuesses}</strong></p>
+                        <div class="bg-blue-100 rounded-2xl p-6">
+                            <p class="text-blue-600 font-bold text-lg mb-2">🔵</p>
+                            <p class="text-5xl font-black text-blue-600">${state.score.blue}</p>
                         </div>
-
-                        <button
-                            onclick="resetGame()"
-                            class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-4 rounded-2xl transform hover:scale-105 transition-all shadow-lg text-lg mb-3"
-                        >
-                            🏠 משחק חדש
-                        </button>
-                        
-                        <button
-                            onclick="state.screen = 'home'; resetGame()"
-                            class="w-full bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 rounded-2xl transition-all"
-                        >
-                            ← חזור לעמוד הבית
-                        </button>
                     </div>
+                    <button onclick="resetGame()" class="w-full bg-purple-600 text-white font-bold py-4 rounded-2xl shadow-lg text-lg mb-3">🏠 משחק חדש</button>
+                    <button onclick="state.screen = 'home'; resetGame()" class="w-full bg-gray-400 text-white font-bold py-3 rounded-2xl">← חזור לבית</button>
                 </div>
-            `;
+            </div>`;
         }
 
-        // Initial render
         render();
     </script>
 </body>
